@@ -5,6 +5,7 @@ import org.w3c.dom.css.Rect;
 import java.io.*;
 import java.util.*;
 
+//
 public class RectanglesUnionWithSegment {
 
     private static BufferedReader br;
@@ -12,11 +13,9 @@ public class RectanglesUnionWithSegment {
     private static StringTokenizer st;
     private static int N;
     private static Rectangle[] rects;
-    //    private static Event[] eV;
-//    private static Event[] eH;
     private static EventX[] eV;
     private static EventY[] eH;
-//    private static int MAX = 1000;
+    private static int[] intervals;
 
     public static void main(String[] args) throws IOException {
         br = new BufferedReader(new InputStreamReader(System.in));
@@ -25,6 +24,7 @@ public class RectanglesUnionWithSegment {
         rects = new Rectangle[N + 1];
         eV = new EventX[2 * N + 1];
         eH = new EventY[2 * N + 1];
+
         for (int i = 1; i <= N; i++) {
             int x1, y1, x2, y2;
             Rectangle r;
@@ -57,6 +57,8 @@ public class RectanglesUnionWithSegment {
             }
         });
 
+
+        intervals = new int[]
         // 전처리 끝
 
         int cntInterval = 2*N-1;

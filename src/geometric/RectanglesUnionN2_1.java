@@ -3,7 +3,7 @@ package geometric;
 import java.io.*;
 import java.util.*;
 
-public class RectanglesUnion {
+public class RectanglesUnionN2_1 {
 
     private static BufferedReader br;
     private static BufferedWriter bw;
@@ -93,7 +93,6 @@ public class RectanglesUnion {
                         if (cntOverlappedRects == 0) {
                             int deltaY = rects[curY.ind][curY.type].y - beginY;
                             area += deltaX * deltaY;
-
                         }
                     }
                 }
