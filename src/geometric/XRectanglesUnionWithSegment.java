@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.*;
 
 //
-public class RectanglesUnionWithSegment {
+public class XRectanglesUnionWithSegment {
 
     private static BufferedReader br;
     private static BufferedWriter bw;
@@ -57,8 +57,6 @@ public class RectanglesUnionWithSegment {
             }
         });
 
-
-        intervals = new int[]
         // 전처리 끝
 
         int cntInterval = 2*N-1;

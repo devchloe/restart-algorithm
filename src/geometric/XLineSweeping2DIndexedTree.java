@@ -8,7 +8,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 // 직사각형 넓이의 합... 아직 못함...
-public class LineSweeping2DIndexedTree {
+public class XLineSweeping2DIndexedTree {
 
     private static BufferedReader br;
     private static StringTokenizer st;
