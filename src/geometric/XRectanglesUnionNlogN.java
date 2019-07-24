@@ -1,80 +1,122 @@
 package geometric;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
+import java.io.*;
+import java.util.*;
 
 public class XRectanglesUnionNlogN {
 
-    public static void main(String[] args) {
-        int N = 2;
-        Rectangle[] rects = new Rectangle[N];
-        rects[0] = new Rectangle(10, 10, 20, 20);
-        rects[1] = new Rectangle(15, 15, 25, 30);
+    private static BufferedReader br;
+    private static BufferedWriter bw;
+    private static StringTokenizer st;
+    private static int N;
+    private static final int MIN_Y = 0;
+    private static final int MAX_Y = 30000;
 
-        ArrayList<EventX> eV = new ArrayList<EventX>();
-        ArrayList<Integer> yList = new ArrayList<>();
-        for (int i=0; i<N; i++) {
-            eV.add(new EventX(rects[i].x1, 1, i));
-            eV.add(new EventX(rects[i].x2, -1, i));
-            yList.add(rects[i].y1);
-            yList.add(rects[i].y2);
+    public static void main(String[] args) throws IOException {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        N = Integer.parseInt(br.readLine());
+        ArrayList<Event> eV = new ArrayList<>();
+        for (int i = 1; i <= N; i++) {
+            st = new StringTokenizer(br.readLine());
+            int x1 = Integer.parseInt(st.nextToken());
+            int y1 = Integer.parseInt(st.nextToken());
+            int x2 = Integer.parseInt(st.nextToken());
+            int y2 = Integer.parseInt(st.nextToken());
+            eV.add(new Event(x1, y1, y2, 1));
+            eV.add(new Event(x2, y1, y2, -1));
         }
-        ArrayList<Integer> uniqueYList = new ArrayList<>(new HashSet<>(yList));
-        Collections.sort(eV, (e1, e2) -> (e1.x - e2.x));
-        Collections.sort(uniqueYList);
+        Collections.sort(eV, new Comparator<Event>() {
+            @Override
+            public int compare(Event o1, Event o2) {
+                return o1.x - o2.x;
+            }
+        });
 
-        Tree tree = new Tree(uniqueYList.size()-1);
-        for (int i=0; i<uniqueYList.size(); i++) {
-            int y1 = uniqueYList.get(i);
-            int y2 = uniqueYList.get(i+1);
+        Tree tree = new Tree(MAX_Y - MIN_Y + 1);
+
+        int area = 0;
+        Event prev = null;
+        for (int i = 0; i < eV.size(); i++) {
+            Event cur = eV.get(i);
+            int l = cur.y1;
+            int r = cur.y2;
+            int deltaX = 0;
+            int cutLength = 0;
+            if (prev != null) {
+                deltaX = cur.x - prev.x;
+                cutLength = tree.query(1, MIN_Y, MAX_Y, MIN_Y, MAX_Y);
+//                cutLength = tree.query(1, MIN_Y, MAX_Y, l, r);
+                area += deltaX * cutLength;
+            }
+            tree.update(1, MIN_Y, MAX_Y, l, r, cur.delta);
+            prev = cur;
         }
 
+        bw.write(area + "\n");
+        bw.flush();
+        bw.close();
+        br.close();
     }
 
-    private static class EventX {
-        int x, type, rectNum;
-        public EventX(int x, int type, int rectNum) {
+    private static class Event {
+        int x, y1, y2, delta;
+
+        public Event(int x, int y1, int y2, int delta) {
             this.x = x;
-            this.type = type;
-            this.rectNum = rectNum;
+            this.y1 = y1;
+            this.y2 = y2;
+            this.delta = delta;
         }
     }
 
     private static class Tree {
         int ts;
-        Interval[] tree;
+        Node[] tree;
 
-        public Tree(int cntYRange) {
+        public Tree(int cntYSegment) { // 0 ~ 30000, cntYSegment = 30001
             this.ts = 1;
-            while (ts < cntYRange) {
+            while (this.ts < cntYSegment) {
                 this.ts <<= 1;
             }
-            this.tree = new Interval[this.ts << 1];
+            tree = new Node[this.ts << 1];
+            for (int i = 0; i < tree.length; i++) {
+                tree[i] = new Node();
+            }
+        }
+
+        public int query(int node, int s, int e, int l, int r) {
+            if (r < s || e < l) return 0;
+
+            if (l <= s && e <= r) return e - s + 1;
+
+            return query(node*2, s, (s+e)/2, l, r) + query(node*2+1, (s+e)/2+1, e, l, r);
+        }
+
+        public void update(int node, int s, int e, int l, int r, int delta) {
+            if (r < s || e < l) return;
+            if (l <= s && e <= r) {
+                tree[node].count += delta;
+            } else { // **
+                update(node * 2, s, (s + e) / 2, l, r, delta);
+                update(node * 2 + 1, (s + e) / 2 + 1, e, l, r, delta);
+//                tree[node].count = tree[node * 2].count + tree[node * 2 + 1].count;
+            }
+
+            if (tree[node].count == 0) {
+                tree[node].sum = tree[node*2].sum + tree[node*2+1].sum;
+            } else {
+                tree[node].sum = e - s + 1;
+            }
         }
     }
 
-    private static class Interval {
-        int y1, y2, interval;
+    private static class Node {
         int sum, count;
 
-        public Interval(int y1, int y2) {
-            this.y1 = y1;
-            this.y2 = y2;
-            this.interval = this.y2 - this.y1;
+        public Node() {
             this.sum = 0;
             this.count = 0;
-        }
-    }
-
-    private static class Rectangle {
-        int x1, y1, x2, y2;
-
-        public Rectangle(int x1, int y1, int x2, int y2) {
-            this.x1 = x1;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
         }
     }
 }
